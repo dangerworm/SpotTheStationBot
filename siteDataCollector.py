@@ -19,29 +19,66 @@ countries = dict([line, {}] for line in countriesLines)
 
 connection = http.client.HTTPSConnection('spotthestation.nasa.gov')
 
-output = open('siteData.txt', 'w')
+output = open('siteData.json', 'w')
+output.write('{\n')
+output.flush()
 
+lastCountry = list(countries.keys())[-1]
 for country in countries.keys():
-    print(country)
-    output.write(country + '\n')
-    output.flush()
+    print('Getting data for %s' % country)
+
+    countries[country] = {}
+
     connection.request('GET', '/sightings/location_files/%s.cfm' % country)
     response = connection.getresponse()
     regions = getDict(response)
 
-    countries[country] = {}
+    output.write('\t"%s":\n' % country)
+    output.write('\t{\n')
+    output.write('\t\t"CountryCode": "%s",\n' % country)
+    output.write('\t\t"CountryName": "%s",\n' % country.replace('_', ' '))
+    output.write('\t\t"Regions":\n')
+    output.write('\t\t[\n')
+    output.flush()
 
+    lastRegion = list(regions.keys())[-1]
     for region in regions.keys():
-        regionKey = region + ':' + regions[region]
-        output.write('    ' + regionKey + '\n')
+        ## countries[country][region] = {}
+        
         connection.request('GET', '/sightings/location_files/%s.cfm' % region)
         response = connection.getresponse()
         cities = getDict(response)
 
-        countries[country][regionKey] = cities
+        countries[country][region] = cities
 
+        output.write('\t\t\t{\n')
+        output.write('\t\t\t\t"RegionCode": "%s",\n' % region)
+        output.write('\t\t\t\t"RegionName": "%s",\n' % regions[region])
+        output.write('\t\t\t\t"Cities":\n')
+        output.write('\t\t\t\t[\n')
+        output.flush()
+
+        lastCity = list(cities.keys())[-1]
         for city in cities.keys():
-            cityKey = city + ':' + cities[city]
-            output.write('        ' + cityKey + '\n')
+            output.write('\t\t\t\t\t{\n')
+            output.write('\t\t\t\t\t\t"CityCode": "%s",\n' % city)
+            output.write('\t\t\t\t\t\t"CityName": "%s"\n' % cities[city])
 
+            comma = '' if city == lastCity else ','
+            output.write('\t\t\t\t\t}%s\n' % comma)
+            output.flush()
+
+        output.write('\t\t\t\t]\n')
+        output.flush()
+
+        comma = '' if region == lastRegion else ',' 
+        output.write('\t\t\t}%s\n' % comma)
+        output.flush()
+
+    output.write('\t\t]\n')
+    comma = '' if country == lastCountry else ','
+    output.write('\t}%s\n' % comma)
+    output.flush()
+        
+output.write('}\n')
 output.close()
