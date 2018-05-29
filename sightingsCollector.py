@@ -69,16 +69,16 @@ while True:
     desiredCity = ''
     
     for word in [w for w in words if w not in stopWords]:
-        matchingKeys += [key for key in cities.keys() if word in key.lower()]
+        matchingKeys += [key for key in cities.keys() if word in cities[key][2].lower()]
         
     if (len(matchingKeys) > 1):
         print("Your query matched %d cities:" % len(matchingKeys))
 
         for key in matchingKeys:
             data = cities[key]
-            print("%s, %s" % (data[2], data[1]))
+            print("%s, %s" % (data[2].replace('_', ' '), data[1].replace('_', ' ')))
 
-        region = input("Which region is it? ")
+        region = input("Which region is it? ").replace(' ', '_')
         desiredCity = [key for key in matchingKeys if region in cities[key][1]][0]
 
     elif (len(matchingKeys) == 1):

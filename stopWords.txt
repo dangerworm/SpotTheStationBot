@@ -71,6 +71,7 @@ if
 in
 into
 is
+iss
 isn't
 it
 it's
