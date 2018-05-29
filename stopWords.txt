@@ -104,6 +104,7 @@ out
 over
 own
 same
+seen
 shan't
 she
 she'd
