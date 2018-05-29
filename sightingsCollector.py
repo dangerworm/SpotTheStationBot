@@ -18,8 +18,6 @@ def getSightings(country, region, city):
     url = 'https://spotthestation.nasa.gov/sightings/view.cfm?'
     url += 'country=%s&region=%s&city=%s' % (country, region, city)
 
-    print(url)
-
     page = requests.get(url)
     tree = html.fromstring(page.content)
 
